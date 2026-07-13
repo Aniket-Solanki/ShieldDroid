@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Android Debugging Security Auditor</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>" />
+  </head>
+  <body>
+    <div class="app-container">
+      
+      <!-- HEADER -->
+      <header>
+        <div class="logo-section">
+          <div class="logo-icon">SH</div>
+          <div>
+            <h1>ShieldDroid</h1>
+            <p style="font-size: 0.8rem; color: var(--color-text-muted);">Android Debugging Security Auditor</p>
+          </div>
+        </div>
+        <div id="connectionStatus" class="connection-status disconnected">
+          <span class="status-dot"></span>
+          <span id="connectionStatusText" class="status-text">Disconnected</span>
+        </div>
+      </header>
+
+      <!-- MAIN LAYOUT -->
+      <div class="main-grid">
+        
+        <!-- EDUCATIONAL INFORMATION (LEFT COLUMN) -->
+        <section class="card danger-alert">
+          <h2 class="title-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-danger);"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Developer Debugging Risks
+          </h2>
+          <p class="vuln-intro">
+            Android's <strong>Developer Options</strong> and <strong>USB Debugging (ADB)</strong> are powerful features meant for developers. However, leaving them permanently enabled on your personal device introduces severe security risks:
+          </p>
+
+          <div class="vuln-list">
+            <div class="vuln-item">
+              <span class="vuln-icon">🔓</span>
+              <div class="vuln-content">
+                <h3>Bypassing Android's Permission Sandbox</h3>
+                <p>An ADB connection has elevated shell privileges, bypassing the standard Android runtime permissions (e.g. accessing files, location, or cameras without prompting the user).</p>
+              </div>
+            </div>
+
+            <div class="vuln-item">
+              <span class="vuln-icon">🌐</span>
+              <div class="vuln-content">
+                <h3>Unauthorized Local Network Access</h3>
+                <p>If "Wireless Debugging" is enabled, any device or malicious actor on the same Wi-Fi network could attempt to connect to your phone's open port and control it remotely.</p>
+              </div>
+            </div>
+
+            <div class="vuln-item">
+              <span class="vuln-icon">💾</span>
+              <div class="vuln-content">
+                <h3>Silent Malware Installation</h3>
+                <p>ADB allows installing applications silently in the background (using <code>pm install</code>) without user consent, making it a gateway for stalkerware or keyloggers.</p>
+              </div>
+            </div>
+
+            <div class="vuln-item">
+              <span class="vuln-icon">🔑</span>
+              <div class="vuln-content">
+                <h3>Physical Extraction & Key Authorization</h3>
+                <p>Once a laptop is authorized via USB debugging, anyone who plugs into your unlocked device can extract all personal photographs, messages, passwords, and app data instantly.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- AUDIT & INTERACTION CONTROL (RIGHT COLUMN) -->
+        <section class="card success-alert">
+          <h2 class="title-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-primary);"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Security Audit Console
+          </h2>
+          
+          <div class="audit-panel">
+            <div class="security-globe">
+              <div class="security-globe-inner">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.66 0 3 1.34 3 3 0 1.09-.59 2.05-1.47 2.58l.47 2.42H10l.47-2.42C9.59 12.05 9 11.09 9 10c0-1.66 1.34-3 3-3z"/>
+                </svg>
+              </div>
+            </div>
+            
+            <p style="color: var(--color-text-muted); margin-bottom: 1.5rem; max-width: 320px; font-size: 0.95rem;">
+              Connect your Android device via USB and enable USB Debugging to audit configurations.
+            </p>
+
+            <!-- Step Action Instruction Box -->
+            <div id="authPromptInstruction" class="auth-instruction">
+              <span style="font-size: 1.5rem;">⚠️</span>
+              <div>
+                <strong>Action Required:</strong> Look at your phone's screen and select <strong>"Always allow from this computer"</strong> and tap <strong>Allow</strong>.
+              </div>
+            </div>
+            
+            <button id="startAuditBtn" class="btn btn-primary" style="margin-top: 1rem;">
+              Start Security Audit
+            </button>
+          </div>
+
+          <!-- AUDIT DETAILS (shown after connection) -->
+          <div id="auditResults" class="audit-results">
+            <div class="result-item">
+              <div class="result-header">
+                <span>USB Debugging Status</span>
+                <span class="badge badge-danger">High Risk</span>
+              </div>
+              <p style="font-size: 0.85rem; color: var(--color-text-muted);">
+                USB Debugging is actively turned on. Recommend turning this off when not debugging apps.
+              </p>
+            </div>
+            
+            <div id="modelResultItem" class="result-item" style="display: none;">
+              <div class="result-header">
+                <span>Audited Device Model</span>
+                <span class="badge badge-success" style="background: rgba(0, 242, 254, 0.1); color: var(--color-primary); border-color: rgba(0, 242, 254, 0.3);">Verified</span>
+              </div>
+              <p id="deviceModelText" style="font-size: 0.85rem; color: var(--color-text-muted);">
+                -
+              </p>
+            </div>
+
+            <!-- Interactive Toggles Section -->
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--color-primary); border-left: 3px solid var(--color-primary); padding-left: 0.5rem; margin-top: 0.5rem; margin-bottom: 0.25rem; text-align: left;">Interactive Toggles</h4>
+              
+              <!-- USB Debugging Toggle -->
+              <div class="switch-container">
+                <div class="switch-info">
+                  <span class="switch-label">USB Debugging</span>
+                  <span class="switch-desc">Disable to kill adb session and secure phone</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="usbDebugToggle" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Wireless Debugging Toggle -->
+              <div class="switch-container">
+                <div class="switch-info">
+                  <span class="switch-label">Wireless Debugging</span>
+                  <span class="switch-desc">Toggle native Android 11+ remote service</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="wifiDebugToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Unknown Sources Sideloading Toggle -->
+              <div class="switch-container">
+                <div class="switch-info">
+                  <span class="switch-label">Unknown Sources Sideloading</span>
+                  <span class="switch-desc">Block/Allow manual APK file installations</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="sideloadToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Package Verification Toggle -->
+              <div class="switch-container">
+                <div class="switch-info">
+                  <span class="switch-label">Package Verification</span>
+                  <span class="switch-desc">Scan sideloaded apps for safety before run</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="verifierToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Security Vitals Dashboard Grid -->
+            <div>
+              <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--color-secondary); border-left: 3px solid var(--color-secondary); padding-left: 0.5rem; margin-top: 1rem; margin-bottom: 0.25rem; text-align: left;">System Vitals</h4>
+              
+              <div class="vitals-grid">
+                <!-- Developer Menu -->
+                <div class="vital-card">
+                  <div class="vital-header">
+                    <span class="vital-title">Developer Menu</span>
+                    <span id="vitalDevMenuBadge" class="badge">Unknown</span>
+                  </div>
+                  <span id="vitalDevMenuDesc" class="vital-desc">-</span>
+                </div>
+
+                <!-- SELinux State -->
+                <div class="vital-card">
+                  <div class="vital-header">
+                    <span class="vital-title">SELinux Policy</span>
+                    <span id="vitalSelinuxBadge" class="badge">Unknown</span>
+                  </div>
+                  <span id="vitalSelinuxDesc" class="vital-desc">-</span>
+                </div>
+
+                <!-- Encryption State -->
+                <div class="vital-card">
+                  <div class="vital-header">
+                    <span class="vital-title">Device Encryption</span>
+                    <span id="vitalEncryptBadge" class="badge">Unknown</span>
+                  </div>
+                  <span id="vitalEncryptDesc" class="vital-desc">-</span>
+                </div>
+
+                <!-- Root Access State -->
+                <div class="vital-card">
+                  <div class="vital-header">
+                    <span class="vital-title">Root / Superuser</span>
+                    <span id="vitalRootBadge" class="badge">Unknown</span>
+                  </div>
+                  <span id="vitalRootDesc" class="vital-desc">-</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DYNAMIC SECURITY REPORT & MITIGATION PANEL -->
+          <div id="securityReportPanel" class="result-item" style="display: none; margin-top: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1); padding: 1.5rem; border-radius: 12px; background: rgba(8, 12, 20, 0.6); flex-direction: column; gap: 1rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 0.75rem;">
+              <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--color-text-main); margin: 0;">Security Assessment</h3>
+              <span id="securityStatusBadge" class="badge">Checking...</span>
+            </div>
+            
+            <div id="mitigationContent" style="font-size: 0.92rem; color: var(--color-text-muted); line-height: 1.6; display: flex; flex-direction: column; gap: 0.75rem;">
+              <!-- Dynamic content injected here -->
+            </div>
+
+            <!-- Disconnect Button -->
+            <button id="disconnectBtn" class="btn" style="background: rgba(255, 77, 77, 0.08); border: 1px solid rgba(255, 77, 77, 0.3); color: var(--color-danger); width: 100%; max-width: 100%; font-size: 0.9rem; padding: 0.75rem 1.5rem; margin-top: 0.5rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.5rem;"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+              Disconnect &amp; Clean Up
+            </button>
+          </div>
+        </section>
+
+        <!-- TERMINAL / CONSOLE LOG -->
+        <section class="card console-card">
+          <div class="console-header">
+            <div class="console-dots">
+              <span class="console-dot red"></span>
+              <span class="console-dot yellow"></span>
+              <span class="console-dot green"></span>
+            </div>
+            <div class="console-title">AUDIT LOGGER LOGS</div>
+            <div style="font-size: 0.75rem; color: #4b5f88;">WebUSB v2.1.0</div>
+          </div>
+          <div id="consoleBody" class="console-body">
+            <div class="log-line">
+              <span class="log-time">[00:00:00]</span>
+              <span class="log-info">ShieldDroid ready. Click "Start Security Audit" to initialize the WebUSB connection.</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- MAIN SCRIPT -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
