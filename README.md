@@ -48,8 +48,8 @@ ShieldDroid helps you **audit**, **monitor**, and **remediate** these risks dire
 ### Run Locally
 ```bash
 # Clone the repository
-git clone https://github.com/Aniket-Solanki/gaynigga.git
-cd gaynigga
+git clone https://github.com/Aniket-Solanki/ShieldDroid.git
+cd ShieldDroid
 
 # Install dependencies
 npm install
