@@ -92,6 +92,11 @@ shielddroid/
         └── vite.svg
 ```
 
+## 🚀 Quick Links
+
+- **Live Demo**: https://shielddroid.vercel.app
+- **Deploy to Vercel**: Automatic via GitHub
+
 ## 🔧 Tech Stack
 
 | Category | Technology |
